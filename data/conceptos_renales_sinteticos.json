@@ -1,0 +1,110 @@
+[
+  {
+    "concept_id": "KIDNEY_REPLACEMENT_THERAPY",
+    "preferred_term": "tratamiento renal sustitutivo",
+    "variants": ["terapia renal sustitutiva", "TRS"],
+    "semantic_type": "treatment",
+    "languages": ["es"],
+    "exclusions": [],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "HEMODIALYSIS",
+    "preferred_term": "hemodiálisis",
+    "variants": ["hemodialisis", "HD", "hemodiàlisi"],
+    "semantic_type": "procedure",
+    "languages": ["es", "ca"],
+    "exclusions": ["candidato a hemodiálisis", "opciones de hemodiálisis"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "HEMODIAFILTRATION",
+    "preferred_term": "hemodiafiltración",
+    "variants": ["hemodiafiltracion", "HDF", "HDF online"],
+    "semantic_type": "procedure",
+    "languages": ["es"],
+    "exclusions": [],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "PERITONEAL_DIALYSIS",
+    "preferred_term": "diálisis peritoneal",
+    "variants": ["dialisis peritoneal", "DP", "DPA", "DPCA"],
+    "semantic_type": "procedure",
+    "languages": ["es", "ca"],
+    "exclusions": ["pendiente de iniciar DP"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "KIDNEY_TRANSPLANT",
+    "preferred_term": "trasplante renal",
+    "variants": ["trasplantado renal", "trasplantada renal", "injerto renal"],
+    "semantic_type": "procedure_status",
+    "languages": ["es"],
+    "exclusions": ["candidato a trasplante renal", "lista de trasplante renal"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "CONSERVATIVE_KIDNEY_CARE",
+    "preferred_term": "tratamiento conservador renal",
+    "variants": ["manejo conservador renal", "tratamiento conservador"],
+    "semantic_type": "treatment",
+    "languages": ["es"],
+    "exclusions": [],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "AV_FISTULA",
+    "preferred_term": "fístula arteriovenosa",
+    "variants": ["fistula arteriovenosa", "FAV", "FAVI"],
+    "semantic_type": "vascular_access",
+    "languages": ["es"],
+    "exclusions": ["FAV trombosada", "pendiente de FAV"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "TUNNELED_DIALYSIS_CATHETER",
+    "preferred_term": "catéter tunelizado de hemodiálisis",
+    "variants": ["CVC tunelizado", "catéter permanente de HD", "cateter tunelizado"],
+    "semantic_type": "vascular_access",
+    "languages": ["es"],
+    "exclusions": ["CVC retirado"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "NONTUNNELED_DIALYSIS_CATHETER",
+    "preferred_term": "catéter temporal de hemodiálisis",
+    "variants": ["CVC temporal", "catéter no tunelizado", "Shaldon"],
+    "semantic_type": "vascular_access",
+    "languages": ["es"],
+    "exclusions": [],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "PERITONEAL_CATHETER",
+    "preferred_term": "catéter peritoneal",
+    "variants": ["catéter de Tenckhoff", "Tenckhoff"],
+    "semantic_type": "peritoneal_access",
+    "languages": ["es"],
+    "exclusions": ["pendiente de colocación de Tenckhoff"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "CHRONIC_KIDNEY_DISEASE",
+    "preferred_term": "enfermedad renal crónica",
+    "variants": ["ERC", "CKD", "insuficiencia renal crónica"],
+    "semantic_type": "disease",
+    "languages": ["es", "en"],
+    "exclusions": ["riesgo de ERC"],
+    "version": "1.0.0"
+  },
+  {
+    "concept_id": "ACUTE_KIDNEY_INJURY",
+    "preferred_term": "lesión renal aguda",
+    "variants": ["fracaso renal agudo", "FRA", "AKI"],
+    "semantic_type": "disease",
+    "languages": ["es", "en"],
+    "exclusions": ["descartar FRA"],
+    "version": "1.0.0"
+  }
+]

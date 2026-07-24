@@ -1,0 +1,13 @@
+[project]
+name = "miopia"
+version = "0.1.0"
+description = "Curso reproducible de NLP clínico: de la miopía a la nefrología"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.1",
+    "ipykernel>=7.3.0",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "spacy==3.8.*",
+]
