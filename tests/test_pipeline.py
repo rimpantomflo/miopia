@@ -1,12 +1,7 @@
 import math
-import sys
-from pathlib import Path
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
-
-from miopia_nlp import (  # noqa: E402
+from miopia_nlp import (
     aggregate_patient,
     binary_metrics,
     extract_mentions,
@@ -38,7 +33,9 @@ class MentionTests(unittest.TestCase):
         self.assertEqual(mention["rule_id"], "MYOPIA_TYPO_WHITELIST")
 
     def test_educational_context(self):
-        mention = extract_mentions("Se explica que la miopía aumenta el riesgo retiniano.")[0]
+        mention = extract_mentions(
+            "Se explica que la miopía aumenta el riesgo retiniano."
+        )[0]
         self.assertEqual(mention["context"], "educational")
 
     def test_offsets_recover_original_text(self):
@@ -97,12 +94,18 @@ class PhenotypeTests(unittest.TestCase):
 class UtilityTests(unittest.TestCase):
     def test_metrics(self):
         result = binary_metrics([1, 1, 0, 0], [1, 0, 1, 0])
-        self.assertEqual((result["tp"], result["tn"], result["fp"], result["fn"]), (1, 1, 1, 1))
+        self.assertEqual(
+            (result["tp"], result["tn"], result["fp"], result["fn"]), (1, 1, 1, 1)
+        )
         self.assertAlmostEqual(result["f1"], 0.5)
 
     def test_undefined_metric_is_nan(self):
         result = binary_metrics([0, 0], [0, 0])
         self.assertTrue(math.isnan(result["sensitivity"]))
+
+    def test_complete_disagreement_has_zero_f1(self):
+        result = binary_metrics([1, 0], [0, 1])
+        self.assertEqual(result["f1"], 0.0)
 
     def test_hmac_is_deterministic_and_keyed(self):
         first = pseudonymize_id("123", b"a sufficiently long secret")

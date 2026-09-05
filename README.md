@@ -1,8 +1,9 @@
-# NLP clínico: de la miopía a la nefrología
+# NLP clínico de cero a Hero
 
-Curso práctico y repositorio reproducible para aprender a construir sistemas de
-NLP sobre texto clínico. La miopía es el caso guiado de principio a fin; la
-nefrología es el dominio de transferencia y del proyecto final.
+Megacurso práctico y repositorio reproducible para aprender a construir,
+evaluar y operar sistemas de NLP sobre texto clínico. La miopía es el caso
+guiado de principio a fin; la nefrología es el dominio de transferencia y del
+proyecto final hospitalario.
 
 No es un producto sanitario ni realiza diagnóstico autónomo. Todo el material
 usa texto ficticio y enseña a producir resultados trazables para revisión
@@ -15,9 +16,10 @@ todo de golpe. Sigue este orden:
 
 1. Ejecuta `tutorial/tutorial_miopia_nlp.ipynb` para recorrer una vez el mapa
    original de ocho etapas.
-2. Trabaja los notebooks de `curso/` en orden, del `00` al `11`.
-3. No avances hasta superar el criterio de salida de cada módulo.
-4. Usa `curso/10_evaluacion_de_competencias.ipynb` como examen y proyecto final.
+2. Trabaja los fundamentos de `curso/00` a `curso/11`.
+3. Completa la ruta avanzada Hero de `curso/12` a `curso/18`.
+4. No avances hasta superar el criterio de salida de cada módulo.
+5. Usa el módulo 10 como examen intermedio y el 18 como capstone de producción.
 
 La [guía operativa del curso](curso/README.md) explica exactamente qué leer,
 qué ejercicios hacer y cómo conservar tus respuestas.
@@ -27,16 +29,27 @@ qué ejercicios hacer y cómo conservar tus respuestas.
 Con `uv` instalado:
 
 ```powershell
-uv sync
+uv sync --group dev
+uv run ruff check src tests scripts curso tutorial main.py
+uv run pytest
 uv run python tutorial/validate_tutorial.py
 uv run python curso/validate_course.py
-uv run python -m unittest discover -s tests -v
+uv run miopia-course-check doctor
 ```
 
-En VS Code o Jupyter, selecciona como kernel el Python de `.venv`. Los módulos
-centrales funcionan sin descargar modelos pesados. Las prácticas opcionales con
-transformers se activan solo al llegar al módulo 04; consulta
+El paquete queda instalado en editable; ya no es necesario manipular `sys.path`
+en scripts propios. En VS Code o Jupyter, selecciona el Python de `.venv`. Los
+módulos centrales funcionan sin descargar modelos pesados. Para las rutas
+opcionales consulta
 [entorno de modelos avanzados](docs/entorno_modelos_avanzados.md).
+
+| Ruta | Instalación | Uso |
+|---|---|---|
+| CPU completa | `uv sync --group dev` | notebooks, ML clásico y tests |
+| Transformers | `uv sync --extra transformers --group dev` | fine-tuning NER |
+| Embeddings | `uv sync --extra embeddings` | RAG denso/híbrido |
+| API | `uv sync --extra service` | FastAPI/monitorización |
+| Oracle | `uv sync --extra oracle` | integración autorizada |
 
 ## Mapa original del proyecto
 
@@ -51,21 +64,22 @@ El tutorial de miopía conserva las ocho etapas solicitadas:
 7. Oracle, lotes y seudonimización con HMAC.
 8. Agregación longitudinal por paciente.
 
-El curso amplía cada etapa y añade NER entrenable, clasificación, relaciones,
-normalización, LLM, RAG, calibración, validación externa, MLOps y transferencia
-a un fenotipo renal. El módulo 11 añade anotación colaborativa asistida
-exclusivamente con Doccano.
+El curso amplía cada etapa y añade ML clásico, NER entrenable, transformers,
+contexto ES/CA, relaciones, normalización con abstención, LLM local, RAG
+híbrido, explicabilidad, calibración, utilidad clínica, validación externa,
+MLOps y transferencia a un fenotipo renal. Doccano cubre anotación asistida;
+la Hero Track culmina en una API y un capstone hospitalario.
 
 ## Estructura
 
 ```text
 tutorial/
   tutorial_miopia_nlp.ipynb   proyecto guiado de miopía
-  mi_cuaderno_trabajo.ipynb   copia personal para experimentar
   build_tutorial.py           fuente reproducible
   validate_tutorial.py        ejecución automática
 curso/
-  00_...ipynb a 11_...ipynb  itinerario completo
+  00_...ipynb a 11_...ipynb  fundamentos
+  12_...ipynb a 18_...ipynb  Hero Track avanzada
   modules/                     fuentes reproducibles de los notebooks
   build_course.py              regenerador
   validate_course.py           ejecutor y comprobador
@@ -74,15 +88,24 @@ data/
 src/miopia_nlp/
   pipeline.py                  baseline auditable de miopía
 src/clinical_nlp_course/
-  utils.py                     métricas y utilidades didácticas reutilizables
+  classical.py, context.py     ML clásico y contexto auditable
+  transformers.py             spans, BIO, subtokens y fuga
+  relations.py                candidatos y clasificación de relaciones
+  normalization.py            linking en dos etapas con abstención
+  retrieval.py, llm.py        RAG híbrido y Ollama local estructurado
+  evaluation.py               utilidad, subgrupos y bootstrap emparejado
+  monitoring.py               contratos, idempotencia, PSI y logs seguros
 docs/
   CURRICULUM.md                objetivos, orden y niveles de dominio
   guia_*.md                    manuales de corpus, validación y LLM/RAG
   plantilla_*.md               ficha de datos y model card
 scripts/
   preparar_doccano.py          JSONL con sugerencias y offsets validados
+  train_token_classifier.py    fine-tuning Hugging Face completo
 tests/
   test_*.py                    pruebas centinela y de utilidades
+.github/workflows/
+  ci.yml                       lint, tests y ejecución de 19 notebooks
 ```
 
 Los notebooks de `curso/` se generan desde `curso/modules/`. Escribe tus
@@ -98,6 +121,7 @@ uv run python curso/validate_course.py
 
 ```powershell
 uv run python main.py "Intervenido por miopía con LASIK en 2018."
+uv run miopia-nlp analyze "No se descarta miopía."
 ```
 
 La salida conserva estado documental, estado actual, menciones, refracciones,
@@ -114,3 +138,10 @@ offsets y reglas activadas.
 - Documentar versión de datos, diccionario, código, modelo y umbral.
 
 La seudonimización no convierte los cursos clínicos en datos anónimos.
+
+Consulta el [protocolo de proyecto hospitalario](docs/proyecto_hospitalario_seguro.md)
+antes de mover un solo dato y la [guía de corpora públicos](docs/public_corpora.md)
+antes de construir el primer benchmark externo. La
+[escalera de proyectos](docs/PROJECT_LADDER.md) propone cinco entregables para
+convertir el curso en portfolio, y `projects/capstone_template/` evita empezar
+un proyecto real desde una carpeta vacía.

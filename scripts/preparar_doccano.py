@@ -9,13 +9,10 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-import sys
-
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
 
 from clinical_nlp_course import dictionary_suggestions, make_doccano_record
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def arguments() -> argparse.Namespace:

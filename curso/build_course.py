@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from curso.notebook_factory import write_notebook
 from curso.modules import (
     module_00,
     module_01,
@@ -23,8 +21,15 @@ from curso.modules import (
     module_09,
     module_10,
     module_11,
+    module_12,
+    module_13,
+    module_14,
+    module_15,
+    module_16,
+    module_17,
+    module_18,
 )
-
+from curso.notebook_factory import write_notebook
 
 MODULES = [
     ("00_mapa_y_metodo.ipynb", module_00.TITLE, module_00.build()),
@@ -43,6 +48,17 @@ MODULES = [
     ("09_produccion_y_monitorizacion.ipynb", module_09.TITLE, module_09.build()),
     ("10_evaluacion_de_competencias.ipynb", module_10.TITLE, module_10.build()),
     ("11_anotacion_asistida_doccano.ipynb", module_11.TITLE, module_11.build()),
+    ("12_ml_clasico_fuerte.ipynb", module_12.TITLE, module_12.build()),
+    ("13_corpora_publicos_benchmark.ipynb", module_13.TITLE, module_13.build()),
+    ("14_finetuning_transformers.ipynb", module_14.TITLE, module_14.build()),
+    (
+        "15_contexto_relaciones_normalizacion.ipynb",
+        module_15.TITLE,
+        module_15.build(),
+    ),
+    ("16_llm_local_rag.ipynb", module_16.TITLE, module_16.build()),
+    ("17_validacion_explicabilidad.ipynb", module_17.TITLE, module_17.build()),
+    ("18_produccion_capstone_hero.ipynb", module_18.TITLE, module_18.build()),
 ]
 
 

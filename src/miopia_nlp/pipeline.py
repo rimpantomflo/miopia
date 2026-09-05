@@ -7,13 +7,13 @@ debe utilizarse para tomar decisiones clínicas sin revisión.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import date, datetime
 import hashlib
 import hmac
 import math
 import re
 import unicodedata
+from dataclasses import asdict, dataclass
+from datetime import date, datetime
 from typing import Any, Iterable, Mapping, Sequence
 
 MYOPIA_THRESHOLD_D = -0.50
@@ -163,7 +163,11 @@ def extract_mentions(text: str) -> list[dict[str, Any]]:
             sentence,
             mention_start_in_sentence,
         )
-        rule_id = "MYOPIA_TYPO_WHITELIST" if _fold(match.group()) == "mipia" else "MYOPIA_LEXICON"
+        rule_id = (
+            "MYOPIA_TYPO_WHITELIST"
+            if _fold(match.group()) == "mipia"
+            else "MYOPIA_LEXICON"
+        )
         mention = Mention(
             text=match.group(),
             start=match.start(),
@@ -240,9 +244,7 @@ def phenotype_course(text: str) -> dict[str, Any]:
     ]
     affirmed = [m for m in patient_clinical if m["assertion"] == "affirmed"]
     possible = [m for m in patient_clinical if m["assertion"] == "possible"]
-    current_positive = [
-        m for m in affirmed if m["temporality"] == "current"
-    ]
+    current_positive = [m for m in affirmed if m["temporality"] == "current"]
     current_negative = [
         m
         for m in patient_clinical
@@ -351,7 +353,9 @@ def binary_metrics(
     if not y_true:
         raise ValueError("Se necesita al menos un ejemplo")
 
-    pairs = [(bool(truth), bool(prediction)) for truth, prediction in zip(y_true, y_pred)]
+    pairs = [
+        (bool(truth), bool(prediction)) for truth, prediction in zip(y_true, y_pred)
+    ]
     tp = sum(truth and prediction for truth, prediction in pairs)
     tn = sum(not truth and not prediction for truth, prediction in pairs)
     fp = sum(not truth and prediction for truth, prediction in pairs)
@@ -364,7 +368,12 @@ def binary_metrics(
     specificity = divide(tn, tn + fp)
     ppv = divide(tp, tp + fp)
     npv = divide(tn, tn + fn)
-    f1 = divide(2 * ppv * sensitivity, ppv + sensitivity)
+    if math.isnan(ppv) or math.isnan(sensitivity):
+        f1 = math.nan
+    elif ppv == 0 and sensitivity == 0:
+        f1 = 0.0
+    else:
+        f1 = divide(2 * ppv * sensitivity, ppv + sensitivity)
     return {
         "tp": tp,
         "tn": tn,

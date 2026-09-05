@@ -1,10 +1,44 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 build/
 dist/
 wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
+
+# Notebooks and editors
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+# Local secrets and clinical data
+.env
+.env.*
+!.env.example
+secrets/
+data/private/
+data/restricted/
+data/raw/
+
+# Models, runs and generated artifacts
+artifacts/
+checkpoints/
+models/
+runs/
+mlruns/
+wandb/
+*.onnx
+*.pt
+*.pth
+*.safetensors
+
+# Operating systems
+.DS_Store
+Thumbs.db

@@ -64,6 +64,16 @@ Recorre el mapa original:
 11. `curso/10_evaluacion_de_competencias.ipynb`
 12. `curso/11_anotacion_asistida_doccano.ipynb`
 
+### Bloque D — Hero Track avanzada
+
+13. `curso/12_ml_clasico_fuerte.ipynb`
+14. `curso/13_corpora_publicos_benchmark.ipynb`
+15. `curso/14_finetuning_transformers.ipynb`
+16. `curso/15_contexto_relaciones_normalizacion.ipynb`
+17. `curso/16_llm_local_rag.ipynb`
+18. `curso/17_validacion_explicabilidad.ipynb`
+19. `curso/18_produccion_capstone_hero.ipynb`
+
 ## Resultados de aprendizaje
 
 ### Tras el Bloque A
@@ -104,6 +114,19 @@ Podrás:
 - decidir si el sistema está listo para piloto silencioso.
 - desplegar un proyecto Doccano ficticio con doble anotación y preanotación;
 - medir si las sugerencias reducen carga sin degradar la referencia.
+
+### Tras la Hero Track
+
+Podrás:
+
+- entrenar y explicar un baseline clásico multilingüe sin fuga;
+- ejecutar un benchmark público con licencia y protocolo trazables;
+- ajustar un token classifier completo y reconstruir offsets;
+- medir contexto, relaciones y normalización como tareas separadas;
+- operar LLM local y RAG híbrido con ACL, abstención y citas;
+- seleccionar umbrales por utilidad y comparar modelos de forma emparejada;
+- exponer una API con contrato, idempotencia, logs seguros y rollback;
+- diseñar un piloto silencioso defendible ante cinco perfiles hospitalarios.
 
 ## Reglas para avanzar
 
@@ -148,6 +171,14 @@ No avances de módulo hasta poder:
 - evalúa utilidad clínica y factores humanos;
 - revalida ante deriva;
 - comunica límites, incertidumbre y ámbito de uso.
+
+### Nivel 5 — Hero hospitalario
+
+- entrega código instalable, probado y monitorizado;
+- separa prototipo, validación, shadow mode y uso asistencial;
+- integra seguridad, privacidad y factores humanos desde el diseño;
+- puede detener, reproducir, auditar y revertir cada versión;
+- sabe cuándo no desplegar aunque una métrica parezca excelente.
 
 ## Uso de datos reales
 

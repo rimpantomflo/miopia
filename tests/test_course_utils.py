@@ -1,12 +1,7 @@
 import math
-import sys
-from pathlib import Path
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
-
-from clinical_nlp_course import (  # noqa: E402
+from clinical_nlp_course import (
     TfidfRetriever,
     annotation_edit_stats,
     brier_score,
@@ -34,6 +29,11 @@ class SpanMetricTests(unittest.TestCase):
         gold = {"C1": [(0, 10, "DISEASE")]}
         pred = {"C1": [(0, 10, "DRUG")]}
         self.assertEqual(overlap_span_metrics(gold, pred)["tp"], 0)
+
+    def test_complete_disagreement_has_zero_f1(self):
+        gold = {"C1": [(0, 4, "DISEASE")]}
+        pred = {"C1": [(5, 9, "DISEASE")]}
+        self.assertEqual(exact_span_metrics(gold, pred)["f1"], 0.0)
 
 
 class CorpusUtilityTests(unittest.TestCase):
@@ -127,7 +127,7 @@ class DoccanoAdapterTests(unittest.TestCase):
         text = "Continúa HD."
         suggestions = dictionary_suggestions(text, self.concepts)
         self.assertEqual(suggestions[0]["evidence"], "HD")
-        self.assertEqual(text[suggestions[0]["start"]:suggestions[0]["end"]], "HD")
+        self.assertEqual(text[suggestions[0]["start"] : suggestions[0]["end"]], "HD")
 
     def test_dictionary_suggestions_respect_exclusions(self):
         text = "Se explican opciones de hemodiálisis."

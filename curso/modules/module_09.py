@@ -1,6 +1,5 @@
 from curso.notebook_factory import code, common_setup, md
 
-
 TITLE = "09 · Producción, MLOps y monitorización clínica"
 
 
@@ -41,6 +40,10 @@ def build() -> list[dict]:
             import numpy as np
             import pandas as pd
 
+            from clinical_nlp_course import (
+                operation_key,
+                population_stability_index,
+            )
             from miopia_nlp import pseudonymize_id
 
             renal_df = pd.read_json(
@@ -190,8 +193,9 @@ def build() -> list[dict]:
             """
             ## 5. Lotes e idempotencia
 
-            La misma entrada + configuración debe producir la misma clave de
-            operación. Así un reintento no duplica resultados.
+            La misma entrada + configuración + versión debe producir la misma
+            clave. Un cambio del texto con el mismo ID debe producir otra; de lo
+            contrario podríamos omitir una nota corregida.
             """
         ),
         code(
@@ -200,16 +204,17 @@ def build() -> list[dict]:
                 for start in range(0, len(frame), size):
                     yield frame.iloc[start:start + size]
 
-            def operation_key(course_id, config_hash):
-                value = f"{course_id}|{config_hash}"
-                return hashlib.sha256(value.encode("utf-8")).hexdigest()
-
             config_hash = config.sha256()
             seen_keys = set()
             processed_count = 0
             for batch in batches(renal_df, size=7):
                 for row in batch.itertuples():
-                    key = operation_key(row.course_id, config_hash)
+                    key = operation_key(
+                        row.course_id,
+                        row.text,
+                        config_hash,
+                        pipeline_version=config.pipeline_version,
+                    )
                     if key in seen_keys:
                         continue
                     seen_keys.add(key)
@@ -323,18 +328,11 @@ def build() -> list[dict]:
         ),
         code(
             """
-            def population_stability_index(reference, current, bins):
-                ref_counts, _ = np.histogram(reference, bins=bins)
-                cur_counts, _ = np.histogram(current, bins=bins)
-                ref_pct = np.clip(ref_counts / ref_counts.sum(), 1e-6, None)
-                cur_pct = np.clip(cur_counts / cur_counts.sum(), 1e-6, None)
-                return float(np.sum((cur_pct - ref_pct) * np.log(cur_pct / ref_pct)))
-
             bins = [0, 50, 100, 150, 250, 500]
             psi_length = population_stability_index(
                 reference_lengths,
                 simulated_future_lengths,
-                bins,
+                bins=bins,
             )
             print("PSI longitud:", psi_length)
             """

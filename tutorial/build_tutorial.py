@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 from textwrap import dedent
 
-
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "tutorial" / "tutorial_miopia_nlp.ipynb"
 
@@ -1016,19 +1015,22 @@ cells = [
     ),
 ]
 
+
 # En la fuente, validación se declara antes para poder mantener juntos sus
 # ejemplos ejecutables. El notebook publicado respeta el mapa docente original:
 # etapa 5 (modelos) precede a etapa 6 (validación).
 def _find_markdown_heading(prefix: str) -> int:
     for index, cell in enumerate(cells):
-        if cell["cell_type"] == "markdown" and "".join(cell["source"]).startswith(prefix):
+        if cell["cell_type"] == "markdown" and "".join(cell["source"]).startswith(
+            prefix
+        ):
             return index
     raise ValueError(f"No se encontró el encabezado: {prefix}")
 
 
 def _insert_after_heading(prefix: str, *new_cells: dict) -> None:
     index = _find_markdown_heading(prefix)
-    cells[index + 1:index + 1] = list(new_cells)
+    cells[index + 1 : index + 1] = list(new_cells)
 
 
 _insert_after_heading(

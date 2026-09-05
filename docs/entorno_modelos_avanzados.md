@@ -21,24 +21,33 @@ siendo necesarias.
 
 ## Entorno separado
 
-Al llegar al módulo 04, crea una rama o copia del entorno y registra las
-versiones resueltas:
+Al llegar al módulo 14, instala el extra ya definido y conserva `uv.lock`:
 
 ```powershell
-uv add --optional models transformers datasets evaluate seqeval accelerate torch
-uv sync --extra models
+uv sync --extra transformers --group dev
+```
+
+Para embeddings locales del módulo 16:
+
+```powershell
+uv sync --extra embeddings
+```
+
+Para la API del módulo 18:
+
+```powershell
+uv sync --extra service
 ```
 
 Para integración Oracle opcional:
 
 ```powershell
-uv add --optional oracle oracledb
 uv sync --extra oracle
 ```
 
-Estos comandos modifican `pyproject.toml` y `uv.lock`; ejecútalos cuando vayas a
-realizar la práctica pesada, no por adelantado. Conserva el lockfile del
-experimento.
+Estos comandos no cambian `pyproject.toml`; sincronizan los grupos ya
+versionados. Registra además revisión exacta del modelo porque un identificador
+sin commit no garantiza los mismos pesos.
 
 ## Ejecución segura
 

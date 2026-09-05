@@ -1,13 +1,86 @@
 [project]
 name = "miopia"
-version = "0.1.0"
-description = "Curso reproducible de NLP clínico: de la miopía a la nefrología"
+version = "0.2.0"
+description = "Curso reproducible y seguro de NLP clínico: de cero a producción hospitalaria"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "rimpantomflo" }]
+keywords = ["clinical-nlp", "medical-nlp", "spacy", "transformers", "rag"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "click>=8.1",
     "ipykernel>=7.3.0",
     "numpy>=1.26",
     "pandas>=2.2",
+    "pydantic>=2.10",
+    "scikit-learn>=1.5",
     "spacy==3.8.*",
 ]
+
+[project.optional-dependencies]
+transformers = [
+    "accelerate>=1.2",
+    "datasets>=3.2",
+    "seqeval>=1.2",
+    "torch>=2.3",
+    "transformers>=4.48",
+]
+embeddings = ["sentence-transformers>=3.3"]
+service = [
+    "fastapi>=0.115",
+    "httpx2>=0.28",
+    "prometheus-client>=0.21",
+    "uvicorn[standard]>=0.34",
+]
+oracle = ["oracledb>=2.5"]
+
+[project.scripts]
+miopia-nlp = "miopia_nlp.cli:main"
+miopia-course-check = "clinical_nlp_course.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clinical_nlp_course", "src/miopia_nlp"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.0",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+extend-exclude = ["*.ipynb"]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"curso/build_course.py" = ["E402"]
+
+[tool.coverage.run]
+branch = true
+source = ["clinical_nlp_course", "miopia_nlp"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
