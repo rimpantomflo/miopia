@@ -1,0 +1,20 @@
+{
+  "intended_use": "",
+  "excluded_uses": [],
+  "data_card": "",
+  "annotation_protocol": "",
+  "baseline_report": "",
+  "candidate_report": "",
+  "locked_test_report": "",
+  "error_analysis": "",
+  "model_card": "",
+  "deployment_plan": "",
+  "monitoring_plan": "",
+  "rollback_plan": "",
+  "safeguards": {
+    "patient_level_split": false,
+    "real_data_authorized": false,
+    "phi_sent_to_unapproved_service": false,
+    "locked_test": false
+  }
+}

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from collections import Counter, defaultdict
 import hashlib
 import math
 import random
 import re
 import unicodedata
-from typing import Any, Callable, Iterable, Mapping, Sequence
+from collections import Counter, defaultdict
+from typing import Any, Iterable, Mapping, Sequence
 
 
 def _safe_divide(numerator: float, denominator: float) -> float:
@@ -18,11 +18,12 @@ def _safe_divide(numerator: float, denominator: float) -> float:
 def _prf(tp: int, fp: int, fn: int) -> dict[str, float | int]:
     precision = _safe_divide(tp, tp + fp)
     recall = _safe_divide(tp, tp + fn)
-    f1 = (
-        _safe_divide(2 * precision * recall, precision + recall)
-        if not (math.isnan(precision) or math.isnan(recall))
-        else math.nan
-    )
+    if math.isnan(precision) or math.isnan(recall):
+        f1 = math.nan
+    elif precision == 0 and recall == 0:
+        f1 = 0.0
+    else:
+        f1 = _safe_divide(2 * precision * recall, precision + recall)
     return {
         "tp": tp,
         "fp": fp,
@@ -70,9 +71,9 @@ def overlap_span_metrics(
     gold_by_doc: Mapping[str, Iterable[Mapping[str, Any] | Sequence[Any]]],
     pred_by_doc: Mapping[str, Iterable[Mapping[str, Any] | Sequence[Any]]],
     *,
-    min_iou: float = 0.01,
+    min_iou: float = 0.50,
 ) -> dict[str, float | int]:
-    """Micro P/R/F1 con emparejamiento uno-a-uno por solapamiento e igual etiqueta."""
+    """Micro P/R/F1 con matching bipartito máximo por IoU e igual etiqueta."""
     if not 0 < min_iou <= 1:
         raise ValueError("min_iou debe estar en (0, 1]")
 
@@ -80,26 +81,34 @@ def overlap_span_metrics(
     for doc_id in set(gold_by_doc) | set(pred_by_doc):
         gold = [_span_tuple(span) for span in gold_by_doc.get(doc_id, [])]
         pred = [_span_tuple(span) for span in pred_by_doc.get(doc_id, [])]
-        candidates = sorted(
-            (
-                (_iou(gold_span, pred_span), gold_index, pred_index)
-                for gold_index, gold_span in enumerate(gold)
-                for pred_index, pred_span in enumerate(pred)
-            ),
-            reverse=True,
-        )
-        used_gold: set[int] = set()
-        used_pred: set[int] = set()
-        for score, gold_index, pred_index in candidates:
-            if score < min_iou:
-                break
-            if gold_index in used_gold or pred_index in used_pred:
-                continue
-            used_gold.add(gold_index)
-            used_pred.add(pred_index)
-        tp += len(used_gold)
-        fp += len(pred) - len(used_pred)
-        fn += len(gold) - len(used_gold)
+        adjacency = {
+            gold_index: sorted(
+                (
+                    pred_index
+                    for pred_index, pred_span in enumerate(pred)
+                    if _iou(gold_span, pred_span) >= min_iou
+                ),
+                key=lambda pred_index: -_iou(gold_span, pred[pred_index]),
+            )
+            for gold_index, gold_span in enumerate(gold)
+        }
+        pred_to_gold: dict[int, int] = {}
+
+        def augment(gold_index: int, visited: set[int]) -> bool:
+            for pred_index in adjacency[gold_index]:
+                if pred_index in visited:
+                    continue
+                visited.add(pred_index)
+                previous_gold = pred_to_gold.get(pred_index)
+                if previous_gold is None or augment(previous_gold, visited):
+                    pred_to_gold[pred_index] = gold_index
+                    return True
+            return False
+
+        matches = sum(augment(index, set()) for index in range(len(gold)))
+        tp += matches
+        fp += len(pred) - matches
+        fn += len(gold) - matches
     return _prf(tp, fp, fn)
 
 
@@ -237,6 +246,7 @@ def validate_llm_extraction(
     source_text: str,
     *,
     allowed_assertions: Sequence[str] = ("affirmed", "negated", "possible"),
+    allowed_concepts: Sequence[str] | None = None,
 ) -> list[str]:
     """Valida estructura y anclaje de una extracción generativa."""
     issues: list[str] = []
@@ -246,6 +256,8 @@ def validate_llm_extraction(
         return [f"faltan campos: {sorted(missing)}"]
     if record["assertion"] not in allowed_assertions:
         issues.append(f"assertion no permitida: {record['assertion']!r}")
+    if allowed_concepts is not None and record["concept"] not in set(allowed_concepts):
+        issues.append(f"concept no permitido: {record['concept']!r}")
     try:
         start = int(record["start"])
         end = int(record["end"])
@@ -257,9 +269,7 @@ def validate_llm_extraction(
         return issues
     recovered = source_text[start:end]
     if recovered != str(record["evidence"]):
-        issues.append(
-            f"evidence no coincide con source_text[start:end]: {recovered!r}"
-        )
+        issues.append(f"evidence no coincide con source_text[start:end]: {recovered!r}")
     if not str(record["concept"]).strip():
         issues.append("concept vacío")
     return issues
@@ -269,6 +279,8 @@ def _binary_counts(
     y_true: Sequence[bool | int],
     y_pred: Sequence[bool | int],
 ) -> tuple[int, int, int, int]:
+    if len(y_true) != len(y_pred):
+        raise ValueError("y_true e y_pred deben tener la misma longitud")
     tp = sum(bool(t) and bool(p) for t, p in zip(y_true, y_pred))
     tn = sum(not bool(t) and not bool(p) for t, p in zip(y_true, y_pred))
     fp = sum(not bool(t) and bool(p) for t, p in zip(y_true, y_pred))

@@ -1,6 +1,5 @@
 from curso.notebook_factory import code, common_setup, md
 
-
 TITLE = "06 · LLM, extracción estructurada y RAG"
 
 
@@ -11,9 +10,9 @@ def build() -> list[dict]:
             # 06 · LLM, extracción estructurada y RAG
 
             Aprenderás el sistema alrededor del LLM: contrato, prompt, evidencia,
-            recuperación, validación, seguridad y evaluación. La ruta ejecutable
-            usa respuestas simuladas para no depender de proveedor ni exponer
-            datos.
+            recuperación, validación, seguridad y evaluación. La ruta CPU usa el
+            mismo contrato Pydantic que el backend Ollama local del módulo 16, sin
+            necesitar un proveedor externo ni exponer datos.
             """
         ),
         md(
@@ -41,7 +40,12 @@ def build() -> list[dict]:
 
             import pandas as pd
 
-            from clinical_nlp_course import TfidfRetriever, validate_llm_extraction
+            from clinical_nlp_course import (
+                HybridRetriever,
+                RuleBasedDemoBackend,
+                extract_structured,
+                validate_llm_extraction,
+            )
             """
         ),
         md(
@@ -169,54 +173,32 @@ def build() -> list[dict]:
         ),
         md(
             """
-            ## 4. Capa adaptadora
+            ## 4. Capa adaptadora ejecutable
 
-            El resto del sistema no debe depender del SDK de un proveedor.
+            El resto del sistema no depende del SDK de un proveedor. El backend
+            offline verifica el contrato; el módulo 16 cambia únicamente el
+            backend por Ollama local.
             """
         ),
         code(
             """
-            def call_llm(prompt, *, model_id, temperature=0):
-                raise RuntimeError(
-                    "Adaptador no configurado. Usa solo un proveedor/modelo "
-                    "autorizado y no incluyas secretos en el notebook."
-                )
-
-            def mock_llm(prompt):
-                text = prompt["untrusted_clinical_text"]
-                if "hemodiálisis" not in text.casefold():
-                    return "[]"
-                start = text.casefold().index("hemodiálisis")
-                return json.dumps([{
-                    "concept": "HEMODIALYSIS",
-                    "assertion": "affirmed",
-                    "evidence": text[start:start + len("hemodiálisis")],
-                    "start": start,
-                    "end": start + len("hemodiálisis"),
-                }], ensure_ascii=False)
-
-            raw_response = mock_llm(prompt)
-            raw_response
+            offline_backend = RuleBasedDemoBackend({
+                "HEMODIALYSIS": ["hemodiálisis"],
+                "PERITONEAL_DIALYSIS": ["diálisis peritoneal"],
+            })
+            structured_response = extract_structured(
+                source_text,
+                backend=offline_backend,
+                allowed_concepts=["HEMODIALYSIS", "PERITONEAL_DIALYSIS"],
+            )
+            structured_response.model_dump()
             """
         ),
         code(
             """
-            def parse_and_validate_response(raw, source):
-                try:
-                    records = json.loads(raw)
-                except json.JSONDecodeError as error:
-                    return {"valid": False, "records": [], "issues": [str(error)]}
-                if not isinstance(records, list):
-                    return {"valid": False, "records": [], "issues": ["la raíz no es lista"]}
-                issues = [
-                    {"index": index, "issues": validate_llm_extraction(record, source)}
-                    for index, record in enumerate(records)
-                    if validate_llm_extraction(record, source)
-                ]
-                return {"valid": not issues, "records": records, "issues": issues}
-
-            parsed = parse_and_validate_response(raw_response, source_text)
-            parsed
+            for record in structured_response.extractions:
+                assert source_text[record.start:record.end] == record.evidence
+            print("Contrato estructurado y offsets: OK")
             """
         ),
         md(
@@ -290,7 +272,7 @@ def build() -> list[dict]:
                 {"id": "K3", "text": "El trasplante renal requiere seguimiento del injerto."},
                 {"id": "K4", "text": "La ERC puede clasificarse por categorías de filtrado y albuminuria."},
             ]
-            retriever = TfidfRetriever().fit(knowledge_chunks)
+            retriever = HybridRetriever().fit(knowledge_chunks)
             retriever.rank("¿Qué acceso se utiliza para hemodiálisis?", k=3)
             """
         ),

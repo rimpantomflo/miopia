@@ -7,9 +7,8 @@ imports, aserciones y dependencias en la ruta principal.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "tutorial" / "tutorial_miopia_nlp.ipynb"
@@ -33,8 +32,7 @@ for cell_number, cell in enumerate(notebook["cells"]):
         exec(compile(source, f"{NOTEBOOK.name}:cell_{cell_number}", "exec"), namespace)
     except Exception as error:
         raise RuntimeError(
-            f"Fallo en celda de notebook {cell_number} "
-            f"(celda de código {code_number})"
+            f"Fallo en celda de notebook {cell_number} (celda de código {code_number})"
         ) from error
 
 print(f"OK: {code_number} celdas de código ejecutadas en orden")

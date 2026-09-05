@@ -17,7 +17,7 @@ Evita texto libre si necesitas extracción. Define esquema:
 
 ```json
 {
-  "concept": "HEMODIALYSIS",
+  "concept_id": "HEMODIALYSIS",
   "assertion": "affirmed",
   "evidence": "continúa en hemodiálisis",
   "start": 20,
@@ -28,6 +28,16 @@ Evita texto libre si necesitas extracción. Define esquema:
 
 Valida tipos, enums, offsets y correspondencia literal con la fuente. Rechaza o
 reintenta salidas inválidas; no las repares silenciosamente.
+
+El módulo `clinical_nlp_course.llm` implementa este contrato con Pydantic y
+`OllamaBackend`. Por defecto solo acepta endpoints de loopback. Actívalo así:
+
+```bash
+ollama serve
+uv run jupyter lab
+```
+
+No cambies `allow_remote` para datos clínicos sin autorización institucional.
 
 ## 3. Prompt
 
@@ -50,7 +60,7 @@ Guarda versión del prompt, modelo, parámetros y fecha.
 Pipeline:
 
 ```text
-documentos → fragmentación → índice → consulta → top-k
+documentos → ACL → fragmentación → índices → fusión/reranking → top-k
            → contexto → generación → citas → validación
 ```
 
@@ -61,6 +71,9 @@ Evalúa por separado:
 
 Si la fuente no está en top-k, la generación no puede compensarlo de forma
 fiable.
+
+`HybridRetriever` combina BM25 y TF-IDF mediante Reciprocal Rank Fusion; acepta
+un encoder local opcional. `retrieval_metrics` calcula Recall@k, MRR y nDCG.
 
 ## 5. Fragmentación
 
@@ -136,4 +149,3 @@ La generación no debe borrar la evidencia del extractor.
 - [HELM](https://crfm.stanford.edu/helm/)
 - [MedHELM](https://crfm.stanford.edu/helm/medhelm/latest/)
 - [NIST Generative AI Profile](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence)
-

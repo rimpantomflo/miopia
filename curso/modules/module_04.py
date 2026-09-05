@@ -1,6 +1,5 @@
 from curso.notebook_factory import code, common_setup, md
 
-
 TITLE = "04 · Transformers y modelos biomédicos del BSC"
 
 
@@ -33,12 +32,9 @@ def build() -> list[dict]:
         common_setup(),
         code(
             """
-            import json
-            from dataclasses import dataclass, asdict
-
             import pandas as pd
 
-            from clinical_nlp_course import exact_span_metrics
+            from clinical_nlp_course import align_word_labels
             """
         ),
         md(
@@ -97,20 +93,7 @@ def build() -> list[dict]:
             # Ejemplo ficticio de word_ids devueltos por un fast tokenizer:
             word_ids = [None, 0, 1, 1, 2, None]
 
-            def align_first_subtoken(word_labels, word_ids):
-                aligned = []
-                previous = None
-                for word_id in word_ids:
-                    if word_id is None:
-                        aligned.append(-100)
-                    elif word_id != previous:
-                        aligned.append(word_labels[word_id])
-                    else:
-                        aligned.append(-100)
-                    previous = word_id
-                return aligned
-
-            aligned = align_first_subtoken(word_labels, word_ids)
+            aligned = align_word_labels(word_ids, word_labels)
             print(aligned)
             assert aligned == [-100, 0, 1, -100, 0, -100]
             """
@@ -291,7 +274,7 @@ def build() -> list[dict]:
         ),
         md(
             """
-            ## 7. Ajuste de token classification — diseño
+            ## 7. Ajuste de token classification — implementación
 
             Ruta:
 
@@ -310,34 +293,23 @@ def build() -> list[dict]:
         ),
         code(
             """
-            RUN_TRANSFORMER_TRAINING = False
-
-            if RUN_TRANSFORMER_TRAINING:
-                from datasets import Dataset
-                from transformers import (
-                    AutoModelForTokenClassification,
-                    AutoTokenizer,
-                    DataCollatorForTokenClassification,
-                    Trainer,
-                    TrainingArguments,
-                )
-
-                base_model = "PlanTL-GOB-ES/roberta-base-biomedical-clinical-es"
-                tokenizer = AutoTokenizer.from_pretrained(base_model, use_fast=True)
-                model = AutoModelForTokenClassification.from_pretrained(
-                    base_model,
-                    num_labels=3,
-                    id2label={0: "O", 1: "B-DISEASE", 2: "I-DISEASE"},
-                    label2id={"O": 0, "B-DISEASE": 1, "I-DISEASE": 2},
-                )
-                # Completar: Dataset, tokenización/alineación, argumentos,
-                # compute_metrics, entrenamiento y evaluación bloqueada.
+            training_script = PROJECT_ROOT / "scripts" / "train_token_classifier.py"
+            assert training_script.exists()
+            command = (
+                "uv run python scripts/train_token_classifier.py "
+                "--data data/restricted/ner_train.jsonl "
+                "--model PlanTL-GOB-ES/roberta-base-biomedical-clinical-es "
+                "--output artifacts/roberta_ner_seed17 --seed 17"
+            )
+            print(command)
             """
         ),
         md(
             """
-            El esqueleto incompleto es deliberado: copiar un `Trainer` sin
-            entender datos y alineación produce métricas engañosas.
+            El script ya implementa lectura/validación, control de fuga por
+            paciente, `DatasetDict`, tokenización/alineación, collator dinámico,
+            `Trainer`, `seqeval`, selección por development, test bloqueado y
+            guardado de pesos, tokenizador y métricas. Se ejecuta en el módulo 14.
 
             Documentación primaria:
             [Hugging Face token classification](https://huggingface.co/docs/transformers/tasks/token_classification).

@@ -1,6 +1,5 @@
 from curso.notebook_factory import code, common_setup, md
 
-
 TITLE = "10 · Evaluación de competencias y capstone"
 
 
@@ -36,13 +35,18 @@ def build() -> list[dict]:
             import spacy
 
             from clinical_nlp_course import (
+                ASSESSMENT_RUBRIC,
                 TfidfRetriever,
                 exact_span_metrics,
                 overlap_span_metrics,
                 patient_hash_split,
+                rubric_total,
                 validate_concept_dictionary,
                 validate_llm_extraction,
             )
+
+            assert rubric_total() == 100
+            print("Rúbrica verificable:", ASSESSMENT_RUBRIC)
             """
         ),
         md(
@@ -298,7 +302,7 @@ def build() -> list[dict]:
         ),
         md(
             """
-            ## Capstone final (15 puntos)
+            ## Capstone final (10 puntos)
 
             Construye un proyecto nuevo sin copiar el fenotipo de TRS:
 
@@ -349,6 +353,10 @@ def build() -> list[dict]:
                 {"competency": "llm_rag", "evidence": "", "status": "pending"},
                 {"competency": "validation", "evidence": "", "status": "pending"},
                 {"competency": "production", "evidence": "", "status": "pending"},
+                {"competency": "classical_ml_baseline", "evidence": "", "status": "pending"},
+                {"competency": "public_external_benchmark", "evidence": "", "status": "pending"},
+                {"competency": "clinical_context_normalization", "evidence": "", "status": "pending"},
+                {"competency": "explainability_utility", "evidence": "", "status": "pending"},
             ])
             competency_matrix
             """

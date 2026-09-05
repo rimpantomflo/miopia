@@ -1,6 +1,5 @@
 from curso.notebook_factory import code, common_setup, md
 
-
 TITLE = "08 · Proyecto integrador de nefrología"
 
 
@@ -466,9 +465,20 @@ def build() -> list[dict]:
                 current_modalities = set()
                 current_access = set()
                 latest_evidence = None
+                conflicts = []
 
                 for row in group.sort_values("date").itertuples():
                     mentions = row.mentions
+                    row_current_modalities = {
+                        mention["concept_id"] for mention in mentions
+                        if mention["concept_id"] in modality_labels
+                        and mention["status"] == "current"
+                    }
+                    row_stopped_modalities = {
+                        mention["concept_id"] for mention in mentions
+                        if mention["concept_id"] in modality_labels
+                        and mention["status"] == "historical_or_stopped"
+                    }
                     for mention in mentions:
                         concept = mention["concept_id"]
                         status = mention["status"]
@@ -477,16 +487,23 @@ def build() -> list[dict]:
                         }:
                             ever_modalities.add(concept)
                             latest_evidence = row.date
-                        if concept in modality_labels:
-                            if status == "current":
-                                current_modalities.add(concept)
-                            elif status == "historical_or_stopped":
-                                current_modalities.discard(concept)
                         if concept in access_labels:
                             if status == "current":
                                 current_access.add(concept)
                             elif status == "historical_or_stopped":
                                 current_access.discard(concept)
+
+                    current_modalities -= row_stopped_modalities
+                    if row_current_modalities:
+                        if len(row_current_modalities) > 1:
+                            conflicts.append({
+                                "course_id": row.course_id,
+                                "type": "multiple_current_modalities",
+                                "values": sorted(row_current_modalities),
+                            })
+                        # Una mención actual nueva sustituye el estado heredado;
+                        # no dejamos modalidades previas coexistir por accidente.
+                        current_modalities = set(row_current_modalities)
 
                     normalized = fold(row.text)
                     if "cvc retirado" in normalized:
@@ -494,12 +511,30 @@ def build() -> list[dict]:
                             "TUNNELED_DIALYSIS_CATHETER",
                             "NONTUNNELED_DIALYSIS_CATHETER",
                         }
+                    compatible_access = {
+                        "HEMODIALYSIS": {
+                            "AV_FISTULA",
+                            "TUNNELED_DIALYSIS_CATHETER",
+                            "NONTUNNELED_DIALYSIS_CATHETER",
+                        },
+                        "HEMODIAFILTRATION": {
+                            "AV_FISTULA",
+                            "TUNNELED_DIALYSIS_CATHETER",
+                            "NONTUNNELED_DIALYSIS_CATHETER",
+                        },
+                        "PERITONEAL_DIALYSIS": {"PERITONEAL_CATHETER"},
+                        "KIDNEY_TRANSPLANT": set(),
+                    }
+                    if len(current_modalities) == 1:
+                        modality = next(iter(current_modalities))
+                        current_access &= compatible_access[modality]
                 return {
                     "ever_trs": bool(ever_modalities),
                     "ever_modalities": sorted(ever_modalities),
                     "current_modalities": sorted(current_modalities),
                     "current_access": sorted(current_access),
                     "latest_evidence": latest_evidence,
+                    "state_conflicts": conflicts,
                 }
 
             patient_rows = []
@@ -525,9 +560,12 @@ def build() -> list[dict]:
         ),
         md(
             """
-            Una máquina de estados real debe definir conflictos, fechas iguales,
-            evidencia negativa, pérdida de injerto, recuperación renal y fuentes
-            estructuradas. Cada transición necesita prueba.
+            La versión corregida sustituye una modalidad heredada cuando existe
+            evidencia actual nueva, cierra estados suspendidos, elimina accesos
+            incompatibles y conserva conflictos explícitos. Una máquina real aún
+            debe definir fechas iguales, evidencia negativa, pérdida de injerto,
+            recuperación renal y fuentes estructuradas. Cada transición necesita
+            prueba.
             """
         ),
         md(

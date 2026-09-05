@@ -1,6 +1,5 @@
 from curso.notebook_factory import code, common_setup, md
 
-
 TITLE = "00 · Mapa, método y lenguaje común"
 
 

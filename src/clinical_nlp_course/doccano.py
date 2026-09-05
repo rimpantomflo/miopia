@@ -11,7 +11,6 @@ import unicodedata
 from collections import Counter
 from typing import Any, Iterable, Mapping, Sequence
 
-
 Label = tuple[int, int, str]
 
 
@@ -28,7 +27,9 @@ def _as_label(value: Mapping[str, Any] | Sequence[Any]) -> Label:
     return int(value[0]), int(value[1]), str(value[2])
 
 
-def validate_doccano_labels(text: str, labels: Iterable[Mapping[str, Any] | Sequence[Any]]) -> list[str]:
+def validate_doccano_labels(
+    text: str, labels: Iterable[Mapping[str, Any] | Sequence[Any]]
+) -> list[str]:
     """Comprueba rangos, etiquetas vacías, duplicados y solapamientos."""
     problems: list[str] = []
     parsed: list[Label] = []
@@ -82,7 +83,10 @@ def dictionary_suggestions(
                 folded_text,
             ):
                 start, end = match.span()
-                if any(ex_start <= start and end <= ex_end for ex_start, ex_end in excluded_ranges):
+                if any(
+                    ex_start <= start and end <= ex_end
+                    for ex_start, ex_end in excluded_ranges
+                ):
                     continue
                 candidates.append(
                     {
@@ -112,7 +116,9 @@ def dictionary_suggestions(
             continue
         selected.append(candidate)
         seen.add(key)
-    return sorted(selected, key=lambda item: (item["start"], item["end"], item["label"]))
+    return sorted(
+        selected, key=lambda item: (item["start"], item["end"], item["label"])
+    )
 
 
 def make_doccano_record(
